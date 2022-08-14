@@ -6,6 +6,7 @@ require "io/console"
 class ExpenseData
   def initialize
     @connection = PG.connect(dbname: "expenses")
+    setup_schema
   end
 
   def list_expenses
@@ -47,6 +48,16 @@ class ExpenseData
   end
 
   private
+
+  def setup_schema
+    result = @connection.exec <<~SQL
+      SELECT COUNT(*) FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = 'expenses';
+    SQL
+
+    sql = File.open('schema.sql', 'rb') { |file| file.read }
+    @connection.exec sql if result[0]["count"] == "0" 
+  end
 
   def display_count(expenses)
     count = expenses.ntuples
