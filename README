@@ -1,0 +1,8 @@
+A small command line application that tracks expenses.
+
+Functionality:
+- list all expense data
+- add an expense
+- search expenses
+- delete expense by id
+- clear / delete all expenses
