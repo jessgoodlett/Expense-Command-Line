@@ -10,13 +10,8 @@ class ExpenseData
 
   def list_expenses
     result = @connection.exec("SELECT * FROM expenses ORDER BY created_on ASC")
-    result.each do |tuple|
-      columns = [ tuple["id"].rjust(3),
-                  tuple["created_on"].rjust(10),
-                  tuple["amount"].rjust(12),
-                  tuple["memo"] ]
-    puts columns.join(" | ")
-    end
+    display_count(result)
+    display_expenses(result) if result.ntuples > 0
   end
 
   def add_expense(amount, memo)
@@ -53,14 +48,28 @@ class ExpenseData
 
   private
 
-  def display_expenses(expense)
-    expense.each do |tuple|
+  def display_count(expenses)
+    count = expenses.ntuples
+    if count == 0
+      puts "There are no expenses."
+    else
+      puts "There are #{count} expense#{"s" if count != 1}."
+    end
+  end
+
+
+  def display_expenses(expenses)
+    expenses.each do |tuple|
       columns = [ tuple["id"].rjust(3),
                   tuple["created_on"].rjust(10),
                   tuple["amount"].rjust(12),
                   tuple["memo"] ]
     puts columns.join(" | ")
     end
+
+    puts "-" * 50
+    expense_sum = expenses.field_values("amount").map(&:to_f).inject(:+)
+    puts "Total #{expense_sum.to_s.rjust(25)}"
   end
 end
 
